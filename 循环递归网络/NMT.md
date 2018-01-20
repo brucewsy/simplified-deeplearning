@@ -87,7 +87,7 @@ $$p_n = \frac {\sum_{C \in \{Candidates\}} \sum_{n-gram \in C} Count_{clip}(n-gr
 
 $$BP = 
 \begin{cases}
-1                 & , if \quad c \gt r </br> 
+1                 & , if \quad c \gt r \\
 e^{1-{r \over c}} & , if \quad c \leq r 
 \end{cases}
 $$
