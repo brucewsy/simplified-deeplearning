@@ -85,9 +85,9 @@ $$p_n = \frac {\sum_{C \in \{Candidates\}} \sum_{n-gram \in C} Count_{clip}(n-gr
 
 首先计算测试文本有效参考长度$r$，即对文本中每个候选译文的最优匹配长度求和。接着，通过以$e$为底、$r/c$为指数的指数级衰减，这里$c$是候选译文文本的总体长度。
 
-$$
-BP = \begin{cases}
-1                 & , if \quad c \gt r \\ 
+$$BP = 
+\begin{cases}
+1                 & , if \quad c \gt r\\ 
 e^{1-{r \over c}} & , if \quad c \leq r 
 \end{cases}
 $$
