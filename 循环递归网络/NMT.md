@@ -1,9 +1,3 @@
-$$\begin{aligned}
-a_t(s) 
-& = align(h_t, \bar{h_s}) \\\\
-& = \frac {\exp(score(h_t, \bar{h_s}))} {\sum{s\'}\exp(score(h_t, \bar{h_s\'}))}
-\end{aligned}$$
-
 # 神经机器翻译（Neural Machine Translation）
 ## BLEU-机器翻译的自动评价方法
 BLEU的全称为Bilingual evaluation understudy
@@ -211,8 +205,11 @@ $$p(y_t | y_{\lt t}, x) = softmax(W_s \tilde{h}_t)$$
 #### 全局注意力（global attention）
 全局注意力（gloabl attention）的核心就是，在导出上下文向量$c_t$的时候，考虑编码器的所有隐藏状态。在这个模型类型中，变长对齐向量（variable-length vector）$a_t$是由对比当前目标隐藏状态$h_t$和每个源隐藏状态（source hidden state）$\tilde{h}_t$:
 
-$$
-a_t(s) = align(h_t, \bar{h_s}) = \frac {\exp(score(h_t, \bar{h_s}))} {\sum{s\'}\exp(score(h_t, \bar{h_s\'}))}
+$$\begin{aligned}
+a_t(s) 
+& = align(h_t, \bar{h_s}) \\\\
+& = \frac {\exp(score(h_t, \bar{h_s}))} {\sum{s\'}\exp(score(h_t, \bar{h_s\'}))}
+\end{aligned}
 $$
 
 这里，$socre$根据基于内容的方程（content-base function）推出，有三中选择方式：
