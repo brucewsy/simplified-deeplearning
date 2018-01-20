@@ -180,7 +180,7 @@ $$\begin{align}
 s_i = f(s_{i-1}, y_{i-1}, c_i)
 \end{align}$$
 
-这里需要注意的就是，不同于公式\eqref{eq:probability_of_output}，这里对于每个目标单词$y_i$使用了不同的上下文向量$c_i$。
+这里需要注意的就是，不同于公式\eqref{eq:probability_of_output}，这里对于每个目标单词$y_i$的条件概率使用了不同的上下文向量$c_i$。
 
 上下文向量$c_i$通过这些注释（annotation）$h_i$的权重相加求得：
 
