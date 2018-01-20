@@ -1,8 +1,8 @@
 $$\overrightarrow{h}_1$$
 
-$$\overrightarrow{h}_{T_x}$$
+$$\overrightarrow{h_{T_x}}$$
 
-$$\overrightarrow{h}_1, \overrightarrow{h}_{T_x}$$
+$$\overrightarrow{h_1},\overrightarrow{h_{T_x}}$$
 
 $$(\overrightarrow{h}_1, \overrightarrow{h}_{T_x})$$
 
