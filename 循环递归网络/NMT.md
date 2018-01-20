@@ -1,3 +1,7 @@
+$\left{y_1, ..., y_{t'-1}\right}$
+
+${y_1, ..., y_{t'-1}$
+
 # 神经机器翻译（Neural Machine Translation）
 ## BLEU-机器翻译的自动评价方法
 BLEU的全称为Bilingual evaluation understudy
