@@ -144,6 +144,7 @@ c = q({h_1, ..., h_{T_x}})
 
 $$\begin{align}
 p({\rm y}) = \prod_{t=1}^T p(y_t | \{y_1, ..., t_{t-1}\}, c)
+\label{eq:probability_of_output}
 \end{align}$$
 
 这里${\rm y} = (y_1, ..., y_{T_y})$。对RNN，每个条件概率模型为：
@@ -152,20 +153,22 @@ $$\begin{align}
 p(y_t | \{y_1, ..., y_{t-1}\}, c) = g(y_{t-1}, s_t, c)
 \end{align}$$
 
-其中$g$为输出$y_t$概率的非线性、多层方程，$s_t$是RNN的隐藏层。
+其中$g$为输出$y_t$概率的非线性、多层方程，$s_t$是RNN的隐藏状态。
 
 所以在机器翻译中，我们的目标函数为：
 
 $$\begin{align}
-J_t = \sum_{(x,y)\in D} - \log p(y | x)
+J_t = \sum_{(x,y)\in {\Bbb D}} - \log p(y | x)
 \end{align}$$
 
+其中${\Bbb D}$是平行训练语料库。
+
 ### 对齐与翻译
-Bahdanau D. et al(2015)提出了一种改进方式，使用两双向RNN作为编码器，在解码过程中，仿真搜索源输入。
+Bahdanau D. et al(2015)提出了一种改进方式，使用双向RNN作为编码器；在解码过程中，解码器仿真搜索源输入。
 
 解码器
 
-新模型中，重新定义了条件概率：
+新结构中，重新定义\eqref{eq:probability_of_output}了条件概率：
 
 $$\begin{align}
 p(y_t | \{y_1, ..., y_{t-1}\}, {\rm x}) = g(y_{t-1}, s_t, c_i)
