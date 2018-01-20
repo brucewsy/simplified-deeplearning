@@ -1,3 +1,7 @@
+$$\overrightarrow{h}_1$$
+
+$$\overrightarrow{h}_{T_x}$$
+
 $$\overrightarrow{h}_1, \overrightarrow{h}_{T_x}$$
 
 $$(\overrightarrow{h}_1, \overrightarrow{h}_{T_x})$$
