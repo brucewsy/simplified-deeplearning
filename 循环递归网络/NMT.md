@@ -1,3 +1,10 @@
+$$\log p(y | x) = \sum_{j=1}^{m} \log p(y_j | y_{\lt j}, s) \text {1}$$
+
+$$p(y_j | y_{\lt j}, s) = softmax(g(h_j)) \text {2}$$
+
+$$h_j = f(h_{j-1}, s) \text {4}$$
+
+
 # 神经机器翻译（Neural Machine Translation）
 ## BLEU-机器翻译的自动评价方法
 BLEU的全称为Bilingual evaluation understudy
