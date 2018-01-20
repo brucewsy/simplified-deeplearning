@@ -185,7 +185,7 @@ $$e_{ij} = a(s_i-1, h_j)$$
 通常RNN从第一个字符$x_1$到最后一个字符$x_{T_x}$有序的读取序列$\rm x$。这里作者做了调整，希望，每个单词的注解（annotation）不仅包括单词本身，还希望它包括后续单词。所以这里使用了双向RNN（bidirectional RNN）。
 
 BiRNN包括前馈RNN与反馈RNN。前馈RNN$\overrightarrow{f}$有序的读取序列，计算出前馈隐藏状态
-$$(\overrightarrow{h}_1, ..., \overrightarrow{h}_{T_x})$$
+$$\left(\overrightarrow{h}_1, ..., \overrightarrow{h}_{T_x}\right)$$
 
 的序列。反馈RNN$\overleftarrow{f}$反向读取序列，生成一个反向隐藏状态$(\overleftarrow{h}_1, ..., \overleftarrow{h}_{T_x})$的序列。
 
@@ -203,7 +203,7 @@ $$h_j = f(h_{j-1}, s)$$
 
 $$J_t = \sum_{(x,y)\in D} - \log p(y | x)$$
 
-Luong M.T. et al.(2016)提出了另一种模式，引入了全局注意力（global attetntion）与局部注意力（local attention）。其实就是在解码阶段，每步t时刻，两个方法都是先获取LSTM在顶层的隐藏状态$h_t$。接着就是导出上下文向量（context vector）$c_t$，它包含了相关输入端（source-side）的信息，来帮助预测当前目标单词$y_t$。而这两个模型不同的就是上下文向量$c_t$的导出方式。
+Luong M.T. et al.(2016)提出了另一种模式，引入了全局注意力（global attetntion）与局部注意力（local attention）。其实就是在解码阶段，每步t时刻，两个方法都是先获取LSTM在顶层的隐藏状态$h_t$。接着就是导出上下文向量（context vector）$c_t$，它包含了相关输入端（source-side）的信息，来帮助预测当前目标单词$y_t$。而这两个模型不同的就是上下文向量$c_t$的导出方式。
 
 接着，给定目标隐藏状态（target hiddent state）$h_t$与输入端的上下文向量（source-side context vector）$c_t$，结合两个向量生成注意力的隐藏状态（attentional hidden state）：
 
@@ -213,7 +213,7 @@ $$\tilde{h}_t = \tanh (W_c [c_t; h_t])$$
 
 $$p(y_t | y_{\lt t}, x) = softmax(W_s \tilde{h}_t)$$
 
-#### 全局注意力（global attention）
+#### 全局注意力（global attention）
 全局注意力（gloabl attention）的核心就是，在导出上下文向量$c_t$的时候，考虑编码器的所有隐藏状态。在这个模型类型中，边长对齐向量$a_t$是由对比当前目标隐藏状态$h_t$和每个源隐藏状态（source hidden state）$\tilde{h}_t$:
 
 $$
@@ -221,7 +221,7 @@ a_{t}(s) = align(h_t, \bar {h}_s) = \frac {\exp(score(h_t, \bar{h}_s))} {\sum_{s
 $$
 
 
-这里，$socre$根据基于内容的方程（content-base function）推出，有三中选择方式：
+这里，$socre$根据基于内容的方程（content-base function）推出，有三中选择方式：
 
 $$
 score(h_s, \bar{h}_t) = \begin{cases}
@@ -231,7 +231,7 @@ v_a^T \tanh (W_a[h_t; \bar{h}_s]) & concat
 \end{cases}$$
 
 相比Bahdanau et al.(2015)，注意力机制都很相似，但有几个关键点不同：
-全局注意力简化了使用在顶层LSTM的隐藏状态；
+全局注意力简化了使用在顶层LSTM的隐藏状态；
 全局的计算路径更为简单：$h_t$ -> $a_t$ -> $c_t$ -> $\tilde{h_t}$，
 而前者不是$h_{t-1}$ -> $a_t$ -> $c_t$ -> $h_t$；
 
