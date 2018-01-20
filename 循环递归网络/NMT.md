@@ -9,7 +9,7 @@ $$a_t(s) = \frac {\exp(score(h_t, \bar{h_s}))} {\sum{s\'}\exp(score(h_t, \bar{h_
 $$ \begin
 a_t(s) 
 & = align(h_t, \bar{h_s}) \\
-& = \frac {\exp(score(h_t, \bar{h_s}))} {\sum{s\'}\exp(score(h_t, \bar{h_s\'}))} 
+& = \frac {\exp(score(h_t, \bar{h_s}))} {\sum{s'}\exp(score(h_t, \bar{h_{s'}}))} 
 \end$$
 
 
