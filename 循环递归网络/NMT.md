@@ -1,12 +1,12 @@
 \begin{cases}
 a = 
-1 & 2\\
+1 & 2\\\
 2 & 3
 \end{cases}
 
 $$f(x)=
 \begin{cases}
-0& \text{x=0}\\
+0& \text{x=0}\\\
 1& \text{x!=0}
 \end{cases}$$
 
