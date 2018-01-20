@@ -148,6 +148,9 @@ $$p(y_t | \{y_1, ..., y_{t-1}\}, c) = g(y_{t-1}, s_t, c)$$
 
 其中$g$为输出$y_t$概率的非线性、多层方程，$s_t$是RNN的隐藏层。
 
+所以在机器翻译中，目标函数为：
+
+$$J_t = \sum_{(x,y)\in D} - \log p(y | x)$$
 
 ### 对齐与翻译
 Bahdanau D. et al(2015)提出了一种改进方式，使用两双向RNN作为编码器，在解码过程中，仿真搜索源输入。
@@ -189,17 +192,6 @@ BiRNN包括前馈RNN与反馈RNN。前馈RNN$\overrightarrow{f}$有序的读取�
 对每个单词$x_j$的注释（annotation），可以通过组合前馈隐藏状态$\overrightarrow{f}$和反馈隐藏状态$\overleftarrow{f}$得到，即$h_j = [\overrightarrow{h_t^T}; \overleftarrow{h_t^T}]^T$。这样注解$h_j$同时包含了预测单词与后续单词的信息。由于RNN对当前的输入会有更好的表示，注解$h_j$将会关注于单词$x_j$附近的信息。
 
 ### 注意力机制（attention machenism）
-
-$$\log p(y | x) = \sum_{j=1}^{m} \log p(y_j | y_{\lt j}, s)$$
-
-$$p(y_j | y_{\lt j}, s) = softmax(g(h_j))$$
-
-$$h_j = f(h_{j-1}, s)$$
-
-目标函数为：
-
-$$J_t = \sum_{(x,y)\in D} - \log p(y | x)$$
-
 Luong M.T. et al.(2016)提出了另一种模式，引入了全局注意力（global attetntion）与局部注意力（local attention）。其实就是在解码阶段，每步t时刻，两个方法都是先获取LSTM在顶层的隐藏状态$h_t$。接着就是导出上下文向量（context vector）$c_t$，它包含了相关输入端（source-side）的信息，来帮助预测当前目标单词$y_t$。而这两个模型不同的就是上下文向量$c_t$的导出方式。
 
 接着，给定目标隐藏状态（target hiddent state）$h_t$与输入端的上下文向量（source-side context vector）$c_t$，结合两个向量生成注意力的隐藏状态（attentional hidden state）：
@@ -250,6 +242,15 @@ $$a_t(s) = align(h_t, \bar {h}_s) \exp (- \frac {(s-p_t)^2} {2 \sigma ^2})$$
 
 使用和函数（）相同的对齐方程（align fucntion），同时标准差是通过经验设置为$\sigma = \frac {D} {2}$。这里$p_t$是实数，相比$s$是在以$p_T$为中心窗口下的整数。
 
+
+
+## 补充
+
+$$\log p(y | x) = \sum_{j=1}^{m} \log p(y_j | y_{\lt j}, s)$$
+
+$$p(y_j | y_{\lt j}, s) = softmax(g(h_j))$$
+
+$$h_j = f(h_{j-1}, s)$$
 
 $$$$
 
