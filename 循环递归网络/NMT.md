@@ -2,8 +2,8 @@
 ## BLEU-机器翻译的自动评价方法
 BLEU的全称为Bilingual evaluation understudy
 
-参考论文（K. Papineni et al. 2002）
-K. Papineni , S. Roukos, T. Ward, and W. J. Zhu. BLEU: a method for automatic evaluation of machine traslation. In ACL, 2002.
+> 参考论文（K. Papineni et al. 2002） </br>
+> K. Papineni, S. Roukos, T. Ward, and W. J. Zhu. BLEU: a method for automatic evaluation of machine traslation. In ACL, 2002.
 
 对于机器翻译，人工评价的开销很大，所以IBM提出了一种机器翻译的自动评价方法，即BLEU。
 那么，我们如何评价一个翻译的好坏？在参考论文中，作者认为越接近于专业人员翻译的机器翻译，就是一个优秀的翻译。
@@ -90,7 +90,7 @@ $$BP = \begin{cases}
 e^{1-{r \over c}} & , \; if \quad c \leq r 
 \end{cases}$$
 
-> 其中，$c$为候选（待评价）翻译的长度，$r$为有效参考译文的长度。
+其中，$c$为候选（待评价）翻译的长度，$r$为有效参考译文的长度。
 
 通过计算$BP$与$p_n$，可以得到BLEU值：
 
@@ -105,6 +105,11 @@ $$\log BLEU = min(1-{r \over c}, 0) + \sum_{n=1}^{N} W_n \log p_n$$
 ------------------------------------------------------------------
 
 ## 神经机器翻译
+
+> 论文参考： </br>
+> Dzmitry Bahdanau, Kyunghyun Cho, and Yoshua Bengio. 2015. Neural machine translation by jointly learning to align and translate. ICLR. </br>
+> Minh-Thang Luong, Hieu Pham, and Christopher D Manning. 2015. Effective approaches to attention-based neural machine translation. EMNLP.
+
 ### 基础的神经机器翻译
 &emsp;&emsp;首先与传统的机器翻译做个对比。传统的机器翻译是基于短语的机器翻译；同时有许多调整过的子成分组成的。
 
@@ -120,7 +125,6 @@ $$\log BLEU = min(1-{r \over c}, 0) + \sum_{n=1}^{N} W_n \log p_n$$
 - Cho et al.(2014), Bahdanau et al.(2015)和Jean et al.(2015)
     - 采用了启发式LSTM隐藏单元(LSTM-inspired hidden unit)与gated recurrent unity(GRU)混合形式的RNN
 
-
 ### 普通的RNN编码器-解码器
 在编码器-解码器结构中，编码器（encoder）读取一个输入语句，即一个向量序列$x=(x_1, \; ..., \; x_{T_x})$，将其转化成一个向量$c$。最常用的方式就是RNN
 
