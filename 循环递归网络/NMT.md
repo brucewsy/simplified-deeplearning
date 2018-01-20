@@ -178,13 +178,16 @@ $$e_{ij} = a(s_i-1, h_j)$$
 
 这个一个对齐模型（alignment model），计算了在$j$位置的输入与$i$位置的输出的匹配程度。这个评价是基于RNN的隐藏状态$s_{i-1}$与输入语句的第$j$个注解$h_j$。
 
-参数化对齐模型$a$做它视为反馈神经网络（feedforward neural network），它联合系统其他部分一同训练。这有别于传统的机器翻译，对齐不被认为是隐式因子。相反，对齐模型直接计算了软对齐（soft alignment），这允许代价函数的梯度反向传播。这个梯度可以被用来训练对齐模型与整个翻译模型。
+参数化对齐模型$a$将它视为反馈神经网络（feedforward neural network），它联合系统其他部分一同训练。这有别于传统的机器翻译，对齐不被认为是隐式因子。相反，对齐模型直接计算了软对齐（soft alignment），这允许代价函数的梯度反向传播。这个梯度可以被用来训练对齐模型与整个翻译模型。
 
 编码器
 
 通常RNN从第一个字符$x_1$到最后一个字符$x_{T_x}$有序的读取序列$\rm x$。这里作者做了调整，希望，每个单词的注解（annotation）不仅包括单词本身，还希望它包括后续单词。所以这里使用了双向RNN（bidirectional RNN）。
 
-BiRNN包括前馈RNN与反馈RNN。前馈RNN$\overrightarrow{f}$有序的读取序列，计算出前馈隐藏状态$(\overrightarrow{h}_1, ..., \overrightarrow{h}_{T_x})$的序列。反馈RNN$\overleftarrow{f}$反向读取序列，生成一个反向隐藏状态$(\overleftarrow{h}_1, ..., \overleftarrow{h}_{T_x})$的序列。
+BiRNN包括前馈RNN与反馈RNN。前馈RNN$\overrightarrow{f}$有序的读取序列，计算出前馈隐藏状态
+$$(\overrightarrow{h}_1, ..., \overrightarrow{h}_{T_x})$$
+
+的序列。反馈RNN$\overleftarrow{f}$反向读取序列，生成一个反向隐藏状态$(\overleftarrow{h}_1, ..., \overleftarrow{h}_{T_x})$的序列。
 
 对每个单词$x_j$的注释（annotation），可以通过组合前馈隐藏状态$\overrightarrow{f}$和反馈隐藏状态$\overleftarrow{f}$得到，即$h_j = [\overrightarrow{h}_t^T; \overleftarrow{h}_t^T]^T$。这样注解$h_j$同时包含了预测单词与后续单词的信息。由于RNN对当前的输入会有更好的表示，注解$h_j$将会关注于单词$x_j$附近的信息。
 
