@@ -1,14 +1,18 @@
-\begin{cases}
-a = 
-1 & 2\\\
+$$
+a =
+\begin{cases} 
+1 & 2\\\\
 2 & 3
 \end{cases}
+$$
 
-$$f(x)=
+$$
+f(x)=
 \begin{cases}
 0& \text{x=0}\\\
 1& \text{x!=0}
-\end{cases}$$
+\end{cases}
+$$
 
 # 神经机器翻译（Neural Machine Translation）
 ## BLEU-机器翻译的自动评价方法
