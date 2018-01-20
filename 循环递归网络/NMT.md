@@ -141,29 +141,37 @@ $$\log BLEU = min(1-{r \over c}, 0) + \sum_{n=1}^{N} W_n \log p_n$$
 ### 普通的RNN编码器-解码器
 在编码器-解码器结构中，编码器（encoder）读取一个输入语句，即一个向量序列$x=(x_1,  ...,  x_{T_x})$，将其转化成一个向量$c$。最常用的方式就是RNN
 
-$$h_t = f(x_t, h_{t-1})$$
+$$\begin{align}
+h_t = f(x_t, h_{t-1})
+\end{align}$$
 
 和
 
-$$c = q({h_1, ..., h_{T_x}})$$
+$$\begin{align}
+c = q({h_1, ..., h_{T_x}})
+\end{align}$$
 
 其中$h_t \in R^n$是$t$时刻的隐藏状态，$c$是一个从隐藏状态序列中生成的向量，$f$与$g$是一些非线性方程。
 
 解码器（decoder）通常被用来训练，在给定上下文向量$c_t$与所有之前预测的单词$\{y_1, ..., y_{t'-1}\}$的情况下，预测下一个单词$y_{t'}$。换而言之，解码器定义了在
 
-$$
+$$\begin{align}
 p(y) = \prod_{t=1}^T p(y_t | \{y_1, ..., t_{t-1}\}, c)
-$$
+\end{align}$$
 
 这里$\rm {y} = (y_1, ..., y_{T_y})$。对RNN，每个条件概率模型为：
 
-$$p(y_t | \{y_1, ..., y_{t-1}\}, c) = g(y_{t-1}, s_t, c)$$
+$$\begin{align}
+p(y_t | \{y_1, ..., y_{t-1}\}, c) = g(y_{t-1}, s_t, c)
+\end{align}$$
 
 其中$g$为输出$y_t$概率的非线性、多层方程，$s_t$是RNN的隐藏层。
 
 所以在机器翻译中，我们的目标函数为：
 
-$$J_t = \sum_{(x,y)\in D} - \log p(y | x)$$
+$$\begin{align}
+J_t = \sum_{(x,y)\in D} - \log p(y | x)
+\end{align}$$
 
 ### 对齐与翻译
 Bahdanau D. et al(2015)提出了一种改进方式，使用两双向RNN作为编码器，在解码过程中，仿真搜索源输入。
@@ -172,25 +180,35 @@ Bahdanau D. et al(2015)提出了一种改进方式，使用两双向RNN作为编
 
 新模型中，重新定义了条件概率：
 
-$$p(y_t | \{y_1, ..., y_{t-1}\}, \rm {x}) = g(y_{t-1}, s_t, c_i)$$
+$$\begin{align}
+p(y_t | \{y_1, ..., y_{t-1}\}, \rm {x}) = g(y_{t-1}, s_t, c_i)
+\end{align}$$
 
 其中，$s_i$是RNN在$t$时刻的隐藏状态，计算如下：
 
-$$s_i = f(s_{i-1},   y_{i-1},   c_i)$$
+$$\begin{align}
+s_i = f(s_{i-1}, y_{i-1}, c_i)
+\end{align}$$
 
 这里需要注意的就是，不同于之前的公式，这里对于每个目标单词$y_i$使用了不同的本文向量$c_i$。
 
 上下文向量$c_i$通过这些$h_i$的权重相加求得：
 
-$$c_i = \sum_{j=1}^{T_x} \alpha_{ij} h_j$$
+$$\begin{align}
+c_i = \sum_{j=1}^{T_x} \alpha_{ij} h_j
+\end{align}$$
 
 这里的$\alpha_{ij}$通过每个$h_j$得到：
 
-$$\alpha_{ij} = \frac {\exp(e_{ij})} {\sum_{k=1}^{T_x} \exp(e_{ik})}$$
+$$\begin{align}
+\alpha_{ij} = \frac {\exp(e_{ij})} {\sum_{k=1}^{T_x} \exp(e_{ik})}
+\end{align}$$
 
 其中
 
-$$e_{ij} = a(s_i-1, h_j)$$
+$$\begin{align}
+e_{ij} = a(s_i-1, h_j)
+\end{align}$$
 
 这个一个对齐模型（alignment model），计算了在$j$位置的输入与$i$位置的输出的匹配程度。这个评价是基于RNN的隐藏状态$s_{i-1}$与输入语句的第$j$个注解$h_j$。
 
@@ -209,30 +227,36 @@ Luong M.T. et al.(2016)提出了另一种模式，引入了全局注意力（glo
 
 接着，给定目标隐藏状态（target hiddent state）$h_t$与输入端的上下文向量（source-side context vector）$c_t$，结合两个向量生成注意力的隐藏状态（attentional hidden state）：
 
-$$\tilde{h}_t = \tanh (W_c [c_t; h_t])$$
+$$\begin{align}
+\tilde{h}_t = \tanh (W_c [c_t; h_t])
+\end{align}$$
 
 而后，再将$\tilde{h}_t$通过$softmax$层，生成预测分布方程：
 
-$$p(y_t | y_{\lt t}, x) = softmax(W_s \tilde{h}_t)$$
+$$\begin{align}
+p(y_t | y_{\lt t}, x) = softmax(W_s \tilde{h}_t)
+\end{align}$$
 
 #### 全局注意力（global attention）
 全局注意力（gloabl attention）的核心就是，在导出上下文向量$c_t$的时候，考虑编码器的所有隐藏状态。在这个模型类型中，变长对齐向量（variable-length vector）$a_t$是由对比当前目标隐藏状态$h_t$和每个源隐藏状态（source hidden state）$\tilde{h}_t$:
 
-$$\begin{aligned}
+$$\begin{align}
 a_t(s) 
 & = align(h_t, \bar{h_s}) \\\\
 & = \frac {\exp(score(h_t, \bar{h_s}))} {\sum{s\'}\exp(score(h_t, \bar{h_s\'}))}
-\end{aligned}
+\end{align}
 $$
 
 这里，$socre$根据基于内容的方程（content-base function）推出，有三中选择方式：
 
-$$
+$$\begin{align}
 score(h_s, \bar{h}_t) = \begin{cases}
 h_t^T \bar{h}_s                  & dot\\\\
 h_t^T W_a \bar{h}_s              & general\\\\
 v_a^T \tanh (W_a[h_t; \bar{h}_s]) & concat
-\end{cases}$$
+\end{cases}
+\end{align}
+$$
 
 相比Bahdanau et al.(2015)，注意力机制都很相似，但有几个关键点不同：
 1. 全局注意力简化了使用在顶层LSTM的隐藏状态；
@@ -248,13 +272,17 @@ v_a^T \tanh (W_a[h_t; \bar{h}_s]) & concat
 
 预测对齐（predictive alignment，local-p），替换单调对齐，模型预测一个对齐位置：
 
-$$p_t = S \cdot sigmode(v_p^T \tanh (W_p h_t))$$
+$$\begin{align}
+p_t = S \cdot sigmode(v_p^T \tanh (W_p h_t))
+\end{align}$$
 
 其中$W_p$和$v_p$是模型参数，被用来学习预测位置。$S$是源输入的长度。在$sigmod$之后，$p_t \in [0,S]$。
 
 为了偏向$p_t$附近的对齐点，在以$p_t$为中心，放置一个高斯分布。特别的，定义对齐权重为：
 
-$$a_t(s) = align(h_t, \bar {h}_s) \exp (- \frac {(s-p_t)^2} {2 \sigma ^2})$$
+$$\begin{align}
+a_t(s) = align(h_t, \bar {h}_s) \exp (- \frac {(s-p_t)^2} {2 \sigma ^2})
+\end{align}$$
 
 使用和函数（）相同的对齐方程（align fucntion），同时标准差是通过经验设置为$\sigma = \frac {D} {2}$。这里$p_t$是实数，相比$s$是在以$p_T$为中心窗口下的整数。
 
