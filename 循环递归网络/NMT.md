@@ -1,3 +1,11 @@
+$$a_t(s) = align(h_t, \bar{h_s})$$
+
+$$s'$$
+
+$$\bar{h_{s'}}$$
+
+$$a_t(s) = \frac {\exp(score(h_t, \bar{h_s}))} {\sum{s\'}\exp(score(h_t, \bar{h_s\'}))}$$
+
 $$ \begin
 a_t(s) 
 & = align(h_t, \bar{h_s}) \\
