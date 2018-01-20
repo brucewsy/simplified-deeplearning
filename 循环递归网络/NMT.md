@@ -182,6 +182,8 @@ s_i = f(s_{i-1}, y_{i-1}, c_i)
 
 这里需要注意的就是，不同于公式\eqref{eq:probability_of_output}，这里对于每个目标单词$y_i$的条件概率使用了不同的上下文向量$c_i$。
 
+上下文向量$c_i$依赖于一个注释（annotations）$(h_1, ..., h_{T_x})$序列，它是由编码器将输入句子映射成的，每个注释（annotations）$h_i$包含了整个输入句子的信息，同时专注与在第$i$个单词周围的的信息。
+
 上下文向量$c_i$通过这些注释（annotation）$h_i$的权重相加求得：
 
 $$\begin{align}
