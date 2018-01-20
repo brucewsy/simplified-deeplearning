@@ -83,7 +83,7 @@ $$p_n = \frac {\sum_{C \in \{Candidates\}} \sum_{n-gram \in C} Count_{clip}(n-gr
 为了克服这个问题引进了一个**惩罚因子（brevity penalty）**，希望当候选译文的长度等于某一参考译文的长度，则惩罚因子为1.0。例如：如果有三个参考译文分别有12、15、17个单词，候选译文有12个单词，此时我们希望惩罚因子为1.0。
 另一个问题是，如果我们一句一句的计算惩罚因子，然后取平均，长度较短的句子将被惩罚的更严重。所以，选择通过整个文本计算惩罚因子，并且允许在句子上有一定的自由度。
 
-首先计算测试文本有效参考长度$r$，即对文本中每个候选译文的最优匹配长度求和。接着，通过以$e$为底、$r/c$为指数的指数级衰减，这里$c$是候选译文文本的总体长度。
+首先计算测试文本有效参考长度$r$，即对文本中每个候选译文的最优匹配长度求和。接着，通过以$e$为底、$r/c$为指数的指数级衰减，这里$c$是候选（待评价）译文文本的总体长度。
 
 $$BP = 
 \begin{cases}
@@ -91,8 +91,6 @@ $$BP =
 e^{1-{r \over c}} & , if \quad c \leq r 
 \end{cases}
 $$
-
-其中，$c$为候选（待评价）翻译的长度，$r$为有效参考译文的长度。
 
 通过计算$BP$与$p_n$，可以得到BLEU值：
 
@@ -102,7 +100,7 @@ $$BLEU = BP * exp(\sum_{n=1}^{N} W_n \log p_n)$$
 
 $$\log BLEU = min(1-{r \over c}, 0) + \sum_{n=1}^{N} W_n \log p_n$$
 
-需要说明的是，BELU的区间介于0.0至1.0之间。很少有翻译可以达到1.0的评价，除非他们与参考译文是一致的。基于这些理由，就算是人工翻译的译文也不一定可以达到1.0的评价。
+需要说明的是，BELU的值介于0.0至1.0之间。很少有翻译可以达到1.0的评价，除非他们与参考译文是一致的。基于这些理由，就算是人工翻译的译文也不一定可以达到1.0的评价。
 
 ------------------------------------------------------------------
 
@@ -128,25 +126,25 @@ $$\log BLEU = min(1-{r \over c}, 0) + \sum_{n=1}^{N} W_n \log p_n$$
     - 采用了启发式LSTM隐藏单元(LSTM-inspired hidden unit)与gated recurrent unity(GRU)混合形式的RNN
 
 ### 普通的RNN编码器-解码器
-在编码器-解码器结构中，编码器（encoder）读取一个输入语句，即一个向量序列$x=(x_1, \; ..., \; x_{T_x})$，将其转化成一个向量$c$。最常用的方式就是RNN
+在编码器-解码器结构中，编码器（encoder）读取一个输入语句，即一个向量序列$x=(x_1,  ...,  x_{T_x})$，将其转化成一个向量$c$。最常用的方式就是RNN
 
-$$h_t = f(x_t, \; h_{t-1})$$
+$$h_t = f(x_t,  h_{t-1})$$
 
 和
 
-$$c = q({h_1, \; ..., \; h_{T_x}})$$
+$$c = q({h_1,   ...,   h_{T_x}})$$
 
 其中$h_t \in R^n$是$t$时刻的隐藏状态，$c$是一个从隐藏状态序列中生成的向量，$f$与$g$是一些非线性方程。
 
 解码器（decoder）通常被用来训练，在给定上下文向量$c_t$与所有之前预测的单词$\{y_1, ..., y_{t'-1}\}$的情况下，预测下一个单词$y_{t'}$。换而言之，解码器定义了在
 
 $$
-p(y) = \prod_{t=1}^T p(y_t \; | \; \{y_1, \; ..., \; t_{t-1}\}, \; c)
+p(y) = \prod_{t=1}^T p(y_t   |   \{y_1,   ...,   t_{t-1}\},   c)
 $$
 
 这里$\rm {y} = (y_1, ..., y_{T_y})$。对RNN，每个条件概率模型为：
 
-$$p(y_t \; | \; \{y_1, ..., y_{t-1}\}, c) = g(y_{t-1}, \; s_t, \; c)$$
+$$p(y_t   |   \{y_1, ..., y_{t-1}\}, c) = g(y_{t-1},   s_t,   c)$$
 
 其中$g$为输出$y_t$概率的非线性、多层方程，$s_t$是RNN的隐藏层。
 
@@ -158,11 +156,11 @@ Bahdanau D. et al(2015)提出了一种改进方式，使用两双向RNN作为编
 
 新模型中，重新定义了条件概率：
 
-$$p(y_t \; | \; \{y_1, ..., y_{t-1}\}, \rm x) = g(y_{t-1}, \; s_t, \; c_i)$$
+$$p(y_t | \{y_1, ..., y_{t-1}\}, \rm x) = g(y_{t-1}, s_t, c_i)$$
 
 其中，$s_i$是RNN在$t$时刻的隐藏状态，计算如下：
 
-$$s_i = f(s_{i-1}, \; y_{i-1}, \; c_i)$$
+$$s_i = f(s_{i-1},   y_{i-1},   c_i)$$
 
 这里需要注意的就是，不同于之前的公式，这里对于每个目标单词$y_i$使用了不同的本文向量$c_i$。
 
@@ -176,7 +174,7 @@ $$\alpha_{ij} = \frac {\exp(e_{ij})} {\sum_{k=1}^{T_x} \exp(e_{ik})}$$
 
 其中
 
-$$e_{ij} = a(s_i-1, \; h_j)$$
+$$e_{ij} = a(s_i-1, h_j)$$
 
 这个一个对齐模型（alignment model），计算了在$j$位置的输入与$i$位置的输出的匹配程度。这个评价是基于RNN的隐藏状态$s_{i-1}$与输入语句的第$j$个注解$h_j$。
 
@@ -186,47 +184,47 @@ $$e_{ij} = a(s_i-1, \; h_j)$$
 
 通常RNN从第一个字符$x_1$到最后一个字符$x_{T_x}$有序的读取序列$\rm x$。这里作者做了调整，希望，每个单词的注解（annotation）不仅包括单词本身，还希望它包括后续单词。所以这里使用了双向RNN（bidirectional RNN）。
 
-BiRNN包括前馈RNN与反馈RNN。前馈RNN$\overrightarrow{f}$有序的读取序列，计算出前馈隐藏状态$(\overrightarrow{h}_1, \; ..., \; \overrightarrow{h}_{T_x})$的序列。反馈RNN$\overleftarrow{f}$反向读取序列，生成一个反向隐藏状态$(\overleftarrow{h}_1, \; ..., \; \overleftarrow{h}_{T_x})$的序列。
+BiRNN包括前馈RNN与反馈RNN。前馈RNN$\overrightarrow{f}$有序的读取序列，计算出前馈隐藏状态$(\overrightarrow{h}_1, ..., \overrightarrow{h}_{T_x})$的序列。反馈RNN$\overleftarrow{f}$反向读取序列，生成一个反向隐藏状态$(\overleftarrow{h}_1, ..., \overleftarrow{h}_{T_x})$的序列。
 
-对每个单词$x_j$的注释（annotation），可以通过组合前馈隐藏状态$\overrightarrow{f}$和反馈隐藏状态$\overleftarrow{f}$得到，即$h_j = [\overrightarrow{h}_t^T; \; \overleftarrow{h}_t^T]^T$。这样注解$h_j$同时包含了预测单词与后续单词的信息。由于RNN对当前的输入会有更好的表示，注解$h_j$将会关注于单词$x_j$附近的信息。
+对每个单词$x_j$的注释（annotation），可以通过组合前馈隐藏状态$\overrightarrow{f}$和反馈隐藏状态$\overleftarrow{f}$得到，即$h_j = [\overrightarrow{h}_t^T; \overleftarrow{h}_t^T]^T$。这样注解$h_j$同时包含了预测单词与后续单词的信息。由于RNN对当前的输入会有更好的表示，注解$h_j$将会关注于单词$x_j$附近的信息。
 
 ### 注意力机制（attention machenism）
 
-$$\log p(y \; | \; x) = \sum_{j=1}^{m} \log p(y_j \; | \; y_{\lt j}, \; s)$$
+$$\log p(y | x) = \sum_{j=1}^{m} \log p(y_j | y_{\lt j}, s)$$
 
-$$p(y_j \; | \; y_{\lt j}, \; s) = softmax(g(h_j))$$
+$$p(y_j | y_{\lt j}, s) = softmax(g(h_j))$$
 
-$$h_j = f(h_{j-1}, \; s)$$
+$$h_j = f(h_{j-1}, s)$$
 
 目标函数为：
 
-$$J_t = \sum_{(x,y)\in D} - \log p(y \; | \; x)$$
+$$J_t = \sum_{(x,y)\in D} - \log p(y | x)$$
 
 Luong M.T. et al.(2016)提出了另一种模式，引入了全局注意力（global attetntion）与局部注意力（local attention）。其实就是在解码阶段，每步t时刻，两个方法都是先获取LSTM在顶层的隐藏状态$h_t$。接着就是导出上下文向量（context vector）$c_t$，它包含了相关输入端（source-side）的信息，来帮助预测当前目标单词$y_t$。而这两个模型不同的就是上下文向量$c_t$的导出方式。
 
 接着，给定目标隐藏状态（target hiddent state）$h_t$与输入端的上下文向量（source-side context vector）$c_t$，结合两个向量生成注意力的隐藏状态（attentional hidden state）：
 
-$$\tilde{h}_t = \tanh (W_c [c_t; \; h_t])$$
+$$\tilde{h}_t = \tanh (W_c [c_t; h_t])$$
 
 而后，再将$\tilde{h}_t$通过$softmax$层，生成预测分布方程：
 
-$$p(y_t \; | \; y_{\lt t}, x) = softmax(W_s \tilde{h}_t)$$
+$$p(y_t | y_{\lt t}, x) = softmax(W_s \tilde{h}_t)$$
 
 #### 全局注意力（global attention）
 全局注意力（gloabl attention）的核心就是，在导出上下文向量$c_t$的时候，考虑编码器的所有隐藏状态。在这个模型类型中，边长对齐向量$a_t$是由对比当前目标隐藏状态$h_t$和每个源隐藏状态（source hidden state）$\tilde{h}_t$:
 
 $$
-a_{t}(s) = align(h_t, \; \bar {h}_s) = \frac {\exp(score(h_t, \; \bar{h}_s))} {\sum_{s'}\exp(score(h_t, \; \bar{h}_{s'}))}
+a_{t}(s) = align(h_t, \bar {h}_s) = \frac {\exp(score(h_t, \bar{h}_s))} {\sum_{s'}\exp(score(h_t, \bar{h}_{s'}))}
 $$
 
 
 这里，$socre$根据基于内容的方程（content-base function）推出，有三中选择方式：
 
 $$
-score(h_s, \; \bar{h}_t) = \begin{cases}
+score(h_s, \bar{h}_t) = \begin{cases}
 h_t^T \bar{h}_s                  & dot\\
 h_t^T W_a \bar{h}_s              & general\\
-v_a^T \tanh (W_a[h_t; \; \bar{h}_s]) & concat
+v_a^T \tanh (W_a[h_t; \bar{h}_s]) & concat
 \end{cases}$$
 
 相比Bahdanau et al.(2015)，注意力机制都很相似，但有几个关键点不同：
@@ -240,7 +238,7 @@ v_a^T \tanh (W_a[h_t; \; \bar{h}_s]) & concat
 
 局部注意力机制有选择性的关注于内容的有个小窗口，这个方法避免了计算的开销，并且更容易训练。
 
-首先，模型在$t$时刻，对于每个目标单词，生成一个对齐的位置$p_t$。接着，通过在窗口$[p_t-D, \;p_t+D]$上加权，生成上下文向量$c_t$，要说明的是$D$是经验选择。不像全局注意力机制，局部对齐向量$a_t$现在是一个固定维度的向量，$\in R^{2D+1}$。这里将这个模型分为两种：
+首先，模型在$t$时刻，对于每个目标单词，生成一个对齐的位置$p_t$。接着，通过在窗口$[p_t-D, p_t+D]$上加权，生成上下文向量$c_t$，要说明的是$D$是经验选择。不像全局注意力机制，局部对齐向量$a_t$现在是一个固定维度的向量，$\in R^{2D+1}$。这里将这个模型分为两种：
 
 单调对齐（Monotonic alignment，loacl-m），简单的设置$p_t=t$，假设输入与目标序列大致单调对齐。这样的对齐向量$a_t$可以用过函数（）定义。
 
@@ -252,7 +250,7 @@ $$p_t = S \cdot sigmode(v_p^T \tanh (W_p h_t))$$
 
 为了偏向$p_t$附近的对齐点，在以$p_t$为中心，放置一个高斯分布。特别的，定义对齐权重为：
 
-$$a_t(s) = align(h_t, \; \bar {h}_s) \exp (- \frac {(s-p_t)^2} {2 \sigma ^2})$$
+$$a_t(s) = align(h_t, \bar {h}_s) \exp (- \frac {(s-p_t)^2} {2 \sigma ^2})$$
 
 使用和函数（）相同的对齐方程（align fucntion），同时标准差是通过经验设置为$\sigma = \frac {D} {2}$。这里$p_t$是实数，相比$s$是在以$p_T$为中心窗口下的整数。
 
