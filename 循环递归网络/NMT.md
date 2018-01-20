@@ -1,3 +1,9 @@
+$$\overrightarrow{h}_1, \overrightarrow{h}_{T_x}$$
+
+$$(\overrightarrow{h}_1, \overrightarrow{h}_{T_x})$$
+
+$$(\overrightarrow{h}_1, \overrightarrow{h}_{T_x})$$
+
 # 神经机器翻译（Neural Machine Translation）
 ## BLEU-机器翻译的自动评价方法
 BLEU的全称为Bilingual evaluation understudy
