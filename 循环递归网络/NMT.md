@@ -4,6 +4,12 @@ a =
 2 & 3
 \end{cases}
 
+$$f(x)=
+\begin{cases}
+0& \text{x=0}\\
+1& \text{x!=0}
+\end{cases}$$
+
 # 神经机器翻译（Neural Machine Translation）
 ## BLEU-机器翻译的自动评价方法
 BLEU的全称为Bilingual evaluation understudy
