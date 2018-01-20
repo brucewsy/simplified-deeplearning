@@ -231,6 +231,7 @@ $$\begin{align}
 a_t(s) 
 & = align(h_t, \bar{h_s}) \\\\
 & = \frac {\exp(score(h_t, \bar{h_s}))} {\sum{s\'}\exp(score(h_t, \bar{h_s\'}))}
+\label{eq:global_attention_alignment_vector}
 \end{align}
 $$
 
@@ -255,7 +256,7 @@ $$
 
 首先，模型在$t$时刻，对于每个目标单词，生成一个对齐的位置$p_t$。接着，通过在窗口$[p_t-D, p_t+D]$上加权，生成上下文向量$c_t$，要说明的是$D$是经验选择。不像全局注意力机制，局部对齐向量$a_t$现在是一个固定维度的向量，$\in R^{2D+1}$。这里将这个模型分为两种：
 
-单调对齐（Monotonic alignment，loacl-m），简单的设置$p_t=t$，假设输入与目标序列大致单调对齐。这样的对齐向量$a_t$可以用过函数（）定义。
+单调对齐（Monotonic alignment，loacl-m），简单的设置$p_t=t$，假设输入与目标序列大致单调对齐。这样的对齐向量$a_t$可以用过公式\eqref{eq:global_attention_alignment_vector}定义。
 
 预测对齐（predictive alignment，local-p），替换单调对齐，模型预测一个对齐位置：
 
@@ -271,7 +272,7 @@ $$\begin{align}
 a_t(s) = align(h_t, \bar {h}_s) \exp (- \frac {(s-p_t)^2} {2 \sigma ^2})
 \end{align}$$
 
-使用和函数（）相同的对齐方程（align fucntion），同时标准差是通过经验设置为$\sigma = \frac {D} {2}$。这里$p_t$是实数，相比$s$是在以$p_T$为中心窗口下的整数。
+使用与公式\eqref{eq:global_attention_alignment_vector}相同的对齐方程（align fucntion），同时标准差是通过经验设置为$\sigma = \frac {D} {2}$。这里$p_t$是实数，相比$s$是在以$p_T$为中心窗口下的整数。
 
 
 
