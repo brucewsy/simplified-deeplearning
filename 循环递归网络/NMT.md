@@ -1,7 +1,3 @@
-$\lbrace y_1, ..., y_{t'-1} \rbrace$
-
-$\{y_1, ..., y_{t'-1}\}$
-
 # 神经机器翻译（Neural Machine Translation）
 ## BLEU-机器翻译的自动评价方法
 BLEU的全称为Bilingual evaluation understudy
@@ -150,7 +146,7 @@ $$\begin{align}
 p(y) = \prod_{t=1}^T p(y_t | \{y_1, ..., t_{t-1}\}, c)
 \end{align}$$
 
-这里$\rm {y} = (y_1, ..., y_{T_y})$。对RNN，每个条件概率模型为：
+这里${\rm y} = (y_1, ..., y_{T_y})$。对RNN，每个条件概率模型为：
 
 $$\begin{align}
 p(y_t | \{y_1, ..., y_{t-1}\}, c) = g(y_{t-1}, s_t, c)
