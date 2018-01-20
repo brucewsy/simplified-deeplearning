@@ -1,16 +1,6 @@
-$$a_t(s) = align(h_t, \bar{h_s})$$
 
-$$s'$$
+$$a_t(s) = align(h_t, \bar{h_s}) = \frac {\exp(score(h_t, \bar{h_s}))} {\sum{s\'}\exp(score(h_t, \bar{h_s\'}))}$$
 
-$$\bar{h_{s'}}$$
-
-$$a_t(s) = \frac {\exp(score(h_t, \bar{h_s}))} {\sum{s\'}\exp(score(h_t, \bar{h_s\'}))}$$
-
-$$ \begin
-a_t(s) 
-& = align(h_t, \bar{h_s}) \\
-& = \frac {\exp(score(h_t, \bar{h_s}))} {\sum{s'}\exp(score(h_t, \bar{h_{s'}}))} 
-\end$$
 
 
 # 神经机器翻译（Neural Machine Translation）
@@ -229,7 +219,7 @@ $$p(y_t | y_{\lt t}, x) = softmax(W_s \tilde{h}_t)$$
 全局注意力（gloabl attention）的核心就是，在导出上下文向量$c_t$的时候，考虑编码器的所有隐藏状态。在这个模型类型中，边长对齐向量$a_t$是由对比当前目标隐藏状态$h_t$和每个源隐藏状态（source hidden state）$\tilde{h}_t$:
 
 $$
-a_{t}(s) = align(h_t, \bar {h}_s) = \frac {\exp(score(h_t, \bar{h}_s))} {\sum_{s'}\exp(score(h_t, \bar{h}_{s'}))}
+a_t(s) = align(h_t, \bar{h_s}) = \frac {\exp(score(h_t, \bar{h_s}))} {\sum{s\'}\exp(score(h_t, \bar{h_s\'}))}
 $$
 
 
