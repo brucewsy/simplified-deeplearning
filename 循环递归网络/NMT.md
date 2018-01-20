@@ -1,8 +1,7 @@
-$$\begin
-a_t(s) 
+$$a_t(s) 
 & = align(h_t, \bar{h_s}) \\\\
 & = \frac {\exp(score(h_t, \bar{h_s}))} {\sum{s\'}\exp(score(h_t, \bar{h_s\'}))}
-\end$$
+$$
 
 # 神经机器翻译（Neural Machine Translation）
 ## BLEU-机器翻译的自动评价方法
