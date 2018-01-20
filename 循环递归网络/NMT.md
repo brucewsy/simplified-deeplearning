@@ -168,7 +168,7 @@ Bahdanau D. et al(2015)提出了一种改进方式，使用双向RNN作为编码
 
 解码器
 
-新结构中，重新定义\eqref{eq:probability_of_output}了条件概率：
+新结构中，重新定义了公式\eqref{eq:probability_of_output}中的条件概率：
 
 $$\begin{align}
 p(y_t | \{y_1, ..., y_{t-1}\}, {\rm x}) = g(y_{t-1}, s_t, c_i)
@@ -180,15 +180,15 @@ $$\begin{align}
 s_i = f(s_{i-1}, y_{i-1}, c_i)
 \end{align}$$
 
-这里需要注意的就是，不同于之前的公式，这里对于每个目标单词$y_i$使用了不同的本文向量$c_i$。
+这里需要注意的就是，不同于公式\eqref{eq:probability_of_output}，这里对于每个目标单词$y_i$使用了不同的上下文向量$c_i$。
 
-上下文向量$c_i$通过这些$h_i$的权重相加求得：
+上下文向量$c_i$通过这些注释（annotation）$h_i$的权重相加求得：
 
 $$\begin{align}
 c_i = \sum_{j=1}^{T_x} \alpha_{ij} h_j
 \end{align}$$
 
-这里的$\alpha_{ij}$通过每个$h_j$得到：
+这里对于每个注释（annotation）$h_j$的权重$\alpha_{ij}$，计算如下：
 
 $$\begin{align}
 \alpha_{ij} = \frac {\exp(e_{ij})} {\sum_{k=1}^{T_x} \exp(e_{ik})}
