@@ -1,8 +1,14 @@
-$$\log p(y | x) = \sum_{j=1}^{m} \log p(y_j | y_{\lt j}, s) \text {1}$$
+$$\begin{align}
+\log p(y | x) = \sum_{j=1}^{m} \log p(y_j | y_{\lt j}, s) 
+\end{align}$$
 
-$$p(y_j | y_{\lt j}, s) = softmax(g(h_j)) \text {2}$$
+$$\begin{align}
+p(y_j | y_{\lt j}, s) = softmax(g(h_j))
+\end{align}$$
 
-$$h_j = f(h_{j-1}, s) \text {4}$$
+$$\begin{align}
+h_j = f(h_{j-1}, s) 
+\end{align}$$
 
 
 # 神经机器翻译（Neural Machine Translation）
