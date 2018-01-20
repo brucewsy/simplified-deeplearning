@@ -103,7 +103,7 @@ $$p_n = \frac {\sum_{C \in \{Candidates\}} \sum_{n-gram \in C} Count_{clip}(n-gr
 
 $$BP = 
 \begin{cases}
-1                 & , if \quad c \gt r \\
+1                 & , if \quad c \gt r \\\\
 e^{1-{r \over c}} & , if \quad c \leq r 
 \end{cases}
 $$
@@ -229,8 +229,8 @@ $$
 
 $$
 score(h_s, \bar{h}_t) = \begin{cases}
-h_t^T \bar{h}_s                  & dot\\
-h_t^T W_a \bar{h}_s              & general\\
+h_t^T \bar{h}_s                  & dot\\\\
+h_t^T W_a \bar{h}_s              & general\\\\
 v_a^T \tanh (W_a[h_t; \bar{h}_s]) & concat
 \end{cases}$$
 
