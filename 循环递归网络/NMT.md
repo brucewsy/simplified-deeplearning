@@ -130,6 +130,7 @@ $$\log BLEU = min(1-{r \over c}, 0) + \sum_{n=1}^{N} W_n \log p_n$$
 
 $$\begin{align}
 h_t = f(x_t, h_{t-1})
+\label{eq:rnn_hidden}
 \end{align}$$
 
 和
@@ -212,7 +213,7 @@ e_{ij} = a(s_i-1, h_j)
 
 编码器
 
-通常RNN从第一个字符$x_1$到最后一个字符$x_{T_x}$有序的读取序列$\rm x$。这里作者做了调整，希望，每个单词的注解（annotation）不仅包括单词本身，还希望它包括后续单词。所以这里使用了双向RNN（bidirectional RNN）。
+公式\eqref{eq:rnn_hidden}通常RNN从第一个字符$x_1$到最后一个字符$x_{T_x}$有序的读取序列$\rm x$。这里作者做了调整，希望，每个单词的注解（annotation）不仅包括单词本身，还希望它包括后续单词。所以这里使用了双向RNN（bidirectional RNN）。
 
 BiRNN包括前馈RNN与反馈RNN。前馈RNN$\overrightarrow{f}$有序的读取序列，计算出前馈隐藏状态$(\overrightarrow{h_1}, ..., \overrightarrow{h_{T_x}})$的序列。反馈RNN$\overleftarrow{f}$反向读取序列，生成一个反向隐藏状态$(\overleftarrow{h_1}, ..., \overleftarrow{h_{T_x}})$的序列。
 
