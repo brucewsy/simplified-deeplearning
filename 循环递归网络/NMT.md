@@ -110,10 +110,9 @@ $$\log BLEU = min(1-{r \over c}, 0) + \sum_{n=1}^{N} W_n \log p_n$$
 > Dzmitry Bahdanau, Kyunghyun Cho, and Yoshua Bengio. 2015. Neural machine translation by jointly learning to align and translate. ICLR. </br>
 > Minh-Thang Luong, Hieu Pham, and Christopher D Manning. 2015. Effective approaches to attention-based neural machine translation. EMNLP.
 
-### 基础的神经机器翻译
-&emsp;&emsp;首先与传统的机器翻译做个对比。传统的机器翻译是基于短语的机器翻译；同时有许多调整过的子成分组成的。
+首先与传统的机器翻译做个对比。传统的机器翻译是基于短语的机器翻译；同时有许多调整过的子成分组成的。
 
-神经机器翻译，则尝试建立训练一个单一的、庞大的神经网络，他由编码器-解码器（encoder-decoder）组成。可以说他是编码器-解码器家族的一员。
+神经机器翻译，试图建立和训练一个单一的、大型神经网络，这个网络可以读取一句话，并输出正确的翻译。它由编码器-解码器（encoder-decoder）组成。可以说它是编码器-解码器家族的一员。编码神经网络将元语句读取并编码成固定长度的向量。然后，解码器从编码后的向量输出翻译。
 
 神经机器翻译，通常使用的是RNN结构(Luong et al. 2015):
 只是对于编码-解码器，会使用不同的RNN形式：
@@ -165,7 +164,7 @@ J_t = \sum_{(x,y)\in {\Bbb D}} - \log p(y | x)
 其中${\Bbb D}$是平行训练语料库。
 
 ### 对齐与翻译
-Bahdanau D. et al(2015)提出了一种改进方式，使用双向RNN作为编码器；在解码过程中，解码器仿真搜索源输入。
+对于编码器-解码器有一个潜在的问题：一个神经网络需要有能力将源输入所有的信息压缩到一个定长的向量，这对于很长的输入将会是非常困难的。Bahdanau D. et al(2015)提出了一种改进方式，使用双向RNN作为编码器；在解码过程中，解码器仿真搜索源输入。
 
 解码器
 
