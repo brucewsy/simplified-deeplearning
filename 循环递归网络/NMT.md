@@ -220,22 +220,22 @@ BiRNN包括前馈RNN与反馈RNN。前馈RNN$\overrightarrow{f}$有序的读取�
 对每个单词$x_j$的注释（annotation），可以通过组合前馈隐藏状态$\overrightarrow{f}$和反馈隐藏状态$\overleftarrow{f}$得到，即$h_j = [\overrightarrow{h_t^T}; \overleftarrow{h_t^T}]^T$。这样注解$h_j$同时包含了预测单词与后续单词的信息。由于RNN对当前的输入会有更好的表示，注解$h_j$将会关注于单词$x_j$附近的信息。
 
 ### 注意力机制（attention machenism）
-Luong M.T. et al.(2016)提出了另一种模式，引入了全局注意力（global attetntion）与局部注意力（local attention）。其实就是在解码阶段，每步t时刻，两个方法都是先获取LSTM在顶层的隐藏状态$h_t$。接着就是导出上下文向量（context vector）$c_t$，它包含了相关输入端（source-side）的信息，来帮助预测当前目标单词$y_t$。而这两个模型不同的就是上下文向量$c_t$的导出方式。
+Luong M.T. et al.(2016)提出了另一种模式，引入了全局注意力（global attetntion）与局部注意力（local attention）。这两个模型的共同之处在于，在解码阶段的每步t时刻，两个方法都是先获取一个堆叠LSTM顶层的隐藏状态$h_t$作为输入。接着就是导出上下文向量（context vector）$c_t$，它包含了相关输入端（source-side）的信息，来帮助预测当前目标单词$y_t$。而这两个模型不同的就是上下文向量$c_t$的导出方式。
 
-接着，给定目标隐藏状态（target hiddent state）$h_t$与输入端的上下文向量（source-side context vector）$c_t$，结合两个向量生成注意力的隐藏状态（attentional hidden state）：
+具体来说，给定目标隐藏状态（target hiddent state）$h_t$与输入端的上下文向量（source-side context vector）$c_t$，使用简单的连接层来组合两个向量生成注意力的隐藏状态（attentional hidden state）：
 
 $$\begin{align}
 \tilde{h}_t = \tanh (W_c [c_t; h_t])
 \end{align}$$
 
-而后，再将$\tilde{h}_t$通过$softmax$层，生成预测分布方程：
+而后，再将注意力向量（attentional vector）$\tilde{h}_t$通过$softmax$层，生成预测分布：
 
 $$\begin{align}
 p(y_t | y_{\lt t}, x) = softmax(W_s \tilde{h}_t)
 \end{align}$$
 
 #### 全局注意力（global attention）
-全局注意力（gloabl attention）的核心就是，在导出上下文向量$c_t$的时候，考虑编码器的所有隐藏状态。在这个模型类型中，变长对齐向量（variable-length vector）$a_t$是由对比当前目标隐藏状态$h_t$和每个源隐藏状态（source hidden state）$\tilde{h}_t$:
+全局注意力模型（gloabl attention model）的核心就是，在推导上下文向量$c_t$的时候，考虑编码器的所有隐藏状态。在这个模型类型中，通过比较当前目标隐藏状态$h_t$和每个源隐藏状态（source hidden state）$\tilde{h}_t$，得到其长度等于输入端时间步长数目的变长对齐向量（variable-length vector）$a_t$:
 
 $$\begin{align}
 a_t(s) 
