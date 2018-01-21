@@ -245,7 +245,7 @@ a_t(s)
 \end{align}
 $$
 
-这里，$socre$根据基于内容的方程（content-base function）推出，有三中选择方式：
+这里，$socre$根据基于内容的方程（content-base function）推出，有三种选择方式：
 
 $$\begin{align}
 score(h_s, \bar{h}_t) = \begin{cases}
@@ -257,34 +257,32 @@ v_a^T \tanh (W_a[h_t; \bar{h}_s]) & concat
 $$
 
 相比Bahdanau et al.(2015)，注意力机制都很相似，但有几个关键点不同：
-1. 全局注意力简化了使用在顶层LSTM的隐藏状态；
-2. 全局的计算路径更为简单：$h_t$ -> $a_t$ -> $c_t$ -> $\tilde{h_t}$，而前者不是$h_{t-1}$ -> $a_t$ -> $c_t$ -> $h_t$。
+1. 全局注意力在编码器和解码器上，简单的使用了顶层LSTM的隐藏状态；
+2. 全局的计算路径更为简单：$h_t$ -> $a_t$ -> $c_t$ -> $\tilde{h_t}$，而Bahdanau et al.(2015)则是：$h_{t-1}$ -> $a_t$ -> $c_t$ -> $h_t$。
 
 局部注意力（loacl attention）
 
-由于全局注意力有个弊端，它需要对每个目标单词，都要在输入端注意所有的单词，这样的开销是巨大的，特别是当输入语句很长时。为了克服这个问题，作者提出了局部注意力机制（local attention mechanism），对于每个目标单词，选择源输入的一小块内容。局部注意力机制由于有选择性的关注于内容的有个小窗口，这个方法避免了计算的开销，并且更容易训练。
+由于全局注意力有个弊端，它需要对每个目标单词，注意他们在输入端的所有的单词，这样的开销是巨大的，同时，可能使翻译长序列（例如段落或者文档）变得不切实际。为了克服这个问题，作者提出了局部注意力机制（local attention mechanism），对于每个目标单词，选择只关注源输入位置的一小部分。
 
-首先，模型在$t$时刻，对于每个目标单词，生成一个对齐的位置$p_t$。接着，通过在窗口$[p_t-D, p_t+D]$上加权，生成上下文向量$c_t$，要说明的是$D$是经验选择。不像全局注意力机制，局部对齐向量$a_t$现在是一个固定维度的向量，$\in R^{2D+1}$。这里将这个模型分为两种：
+局部注意力机制有选择性的关注于内容的一个小窗口，这个方法避免了计算的开销，并且更容易训练。
 
-单调对齐（Monotonic alignment，loacl-m），简单的设置$p_t=t$，假设输入与目标序列大致单调对齐。这样的对齐向量$a_t$可以用过公式\eqref{eq:global_attention_alignment_vector}定义。
+首先，模型在$t$时刻，对于每个目标单词，生成一个对齐位置$p_t$。接着，通过在窗口$[p_t-D, p_t+D]$上加权平均，生成上下文向量$c_t$，要说明的是$D$是经验选择。与全局注意力机制不同，局部对齐向量$a_t$现在是一个固定维度的向量，$\in R^{2D+1}$。这里如下两个模型的变体：
 
-预测对齐（predictive alignment，local-p），替换单调对齐，模型预测一个对齐位置：
+单调对齐（Monotonic alignment，loacl-m），简单的设定$p_t=t$，假设输入与目标序列大致单调对齐。这样的对齐向量$a_t$可以用过公式\eqref{eq:global_attention_alignment_vector}定义。
+
+预测对齐（predictive alignment，local-p），不是假设单调对齐，而是预测对齐的位置：
 
 $$\begin{align}
 p_t = S \cdot sigmode(v_p^T \tanh (W_p h_t))
 \end{align}$$
 
-其中$W_p$和$v_p$是模型参数，被用来学习预测位置。$S$是源输入的长度。在$sigmod$之后，$p_t \in [0,S]$。
-
-为了偏向$p_t$附近的对齐点，在以$p_t$为中心，放置一个高斯分布。特别的，定义对齐权重为：
+其中$W_p$和$v_p$是模型参数，被用来学习预测位置。$S$是源输入的长度。在$sigmod$之后，$p_t \in [0,S]$。为了更好的利用$p_t$附近的对齐点，放置一个以$p_t$为中心的高斯分布。具体来说，对齐权重定义为：
 
 $$\begin{align}
 a_t(s) = align(h_t, \bar {h}_s) \exp (- \frac {(s-p_t)^2} {2 \sigma ^2})
 \end{align}$$
 
-使用与公式\eqref{eq:global_attention_alignment_vector}相同的对齐方程（align fucntion），同时标准差是通过经验设置为$\sigma = \frac {D} {2}$。这里$p_t$是实数，相比$s$是在以$p_T$为中心窗口下的整数。
-
-
+使用与公式\eqref{eq:global_attention_alignment_vector}相同的对齐方程（align fucntion），同时标准差是通过经验设定为$\sigma = \frac {D} {2}$。这里$p_t$是实数，而$s$是以$p_T$为中心的窗口下的整数。
 
 ## 补充
 
