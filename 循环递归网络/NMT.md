@@ -167,6 +167,8 @@ J_t = \sum_{(x,y)\in {\Bbb D}} - \log p(y | x)
 ### 对齐与翻译
 对于编码器-解码器有一个潜在的问题：一个神经网络需要有能力将源输入所有的信息压缩到一个定长的向量，这对于很长的输入将会是非常困难的。Bahdanau D. et al(2015)提出了一种改进方式，使用双向RNN作为编码器；在解码过程中，解码器仿真搜索源输入。
 
+![注意力模型](img/nmt_attention.png)
+
 解码器
 
 新结构中，重新定义了公式\eqref{eq:probability_of_output}中的条件概率：
@@ -235,6 +237,7 @@ p(y_t | y_{\lt t}, x) = softmax(W_s \tilde{h}_t)
 \end{align}$$
 
 #### 全局注意力（global attention）
+![全局注意力]（img/nmt_global_attention.png）
 全局注意力模型（gloabl attention model）的核心就是，在推导上下文向量$c_t$的时候，考虑编码器的所有隐藏状态。在这个模型类型中，通过比较当前目标隐藏状态$h_t$和每个源隐藏状态（source hidden state）$\tilde{h}_t$，得到其长度等于输入端时间步长数目的变长对齐向量（variable-length vector）$a_t$:
 
 $$\begin{align}
@@ -261,7 +264,7 @@ $$
 2. 全局的计算路径更为简单：$h_t$ -> $a_t$ -> $c_t$ -> $\tilde{h_t}$，而Bahdanau et al.(2015)则是：$h_{t-1}$ -> $a_t$ -> $c_t$ -> $h_t$。
 
 局部注意力（loacl attention）
-
+![局部注意力]（img/nmt_local_attention.png）
 由于全局注意力有个弊端，它需要对每个目标单词，注意他们在输入端的所有的单词，这样的开销是巨大的，同时，可能使翻译长序列（例如段落或者文档）变得不切实际。为了克服这个问题，作者提出了局部注意力机制（local attention mechanism），对于每个目标单词，选择只关注源输入位置的一小部分。
 
 局部注意力机制有选择性的关注于内容的一个小窗口，这个方法避免了计算的开销，并且更容易训练。
