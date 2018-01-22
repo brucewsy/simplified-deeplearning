@@ -125,7 +125,7 @@ $$\log BLEU = min(1-{r \over c}, 0) + \sum_{n=1}^{N} W_n \log p_n$$
     - 采用了启发式LSTM隐藏单元(LSTM-inspired hidden unit)与gated recurrent unity(GRU)混合形式的RNN
 
 ### 普通的RNN编码器-解码器
-![Alt text](/img/nmt_encdec.jpg "Optional title")
+![编码器-解码器](img/nmt_encdec.jpg)
 在编码器-解码器结构中，编码器（encoder）读取一个输入语句，即一个向量序列${\rm x}=(x_1,  ...,  x_{T_x})$，将其转化成一个向量$c$。最常用的方式就是使用一个RNN
 
 $$\begin{align}
