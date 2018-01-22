@@ -283,6 +283,10 @@ a_t(s) = align(h_t, \bar {h}_s) \exp (- \frac {(s-p_t)^2} {2 \sigma ^2})
 
 使用与公式\eqref{eq:global_attention_alignment_vector}相同的对齐方程（align fucntion），同时标准差是通过经验设定为$\sigma = \frac {D} {2}$。这里$p_t$是实数，而$s$是以$p_T$为中心的窗口下的整数。
 
+## 代码实例
+
+> 参考Tensorflow Tutorial: https://github.com/tensorflow/nmt
+
 ## 补充
 
 $$\log p(y | x) = \sum_{j=1}^{m} \log p(y_j | y_{\lt j}, s)$$
