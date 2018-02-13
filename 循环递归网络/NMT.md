@@ -1,297 +1,67 @@
-# 神经机器翻译（Neural Machine Translation）
-## BLEU-机器翻译的自动评价方法
-BLEU的全称为Bilingual evaluation understudy
+HUB and Authority
 
-> 参考论文（K. Papineni et al. 2002） </br>
-> [K. Papineni, S. Roukos, T. Ward, and W. J. Zhu. BLEU: a method for automatic evaluation of machine traslation. In ACL, 2002.](http://www.aclweb.org/anthology/P02-1040.pdf)
+现在，可以发展出了一个模式：给定一个查询（query），对每个网页赋予两个分数（scores）。一个称为中心分数（hub score，有些地方表示为链接权威度），另一个称为权威分数（authority score，有些地方表示为内容权威度）。对于任意的查询，对结果计算两个排序表（ranked list）。一个排序表通过中心分数（hub score）计算得到，另一个则通过权威分数（authority score）得到。
 
-对于机器翻译，人工评价的开销很大，所以IBM提出了一种机器翻译的自动评价方法，即BLEU。
-那么，我们如何评价一个翻译的好坏？在参考论文中，作者认为越接近于专业人员翻译的机器翻译，就是一个优秀的翻译。
+这个方法起源于对于创建网页的特殊的洞察力，即有两种主要类型的网页可作为泛化主题检索（board-topic searches）的结果。通过一个泛化主题检索，这里指的是一个信息化查询，例如"I wish to learn about leukemia."（我希望了解白血病）。有许多关于该主题的权威信息来源，以leukemia为例，国家癌症研究所关于白血病的网页就是这样的权威信息。我们称这样的网页为权威（authorities），我们希望将它体现在计算中，这样的网页将有更高的权威分数（authority scores）。
 
-以这个作为核心的想法，一个判断机器翻译质量的方法是，根据一个数值型指标，来评价译文与一个或多个参考译文的相近程度。所以，在这套机器翻译评价体系中，有两个前提：
-1. 一个数值型的“翻译相似度”；
-2. 一组高质量的翻译参考译文。
+另一方面，网络（Web）上有许多页面是手动编译的关于特定主题的权威网页的链接列表。这些中心页面（hub pages）本身不是关于主题特定信息的权威来源，而是由对该主题感兴趣的人花时间将他们编辑在一起。于是，这个方法会使用这样的中心页面来发现权威页面。在开发的计算过程中，这样的中心页面将会有更高的中心分数（hub scores）。
 
-首先来看例1，包含两段待评价译文，与三段参考译文：
+一个优质的中心页面会指向许多优质的权威页面；一个优质的权威页面，又会被有许多优质的中心页面指向。于是，我们对中心（hub）与权威（authority）有一个循环定义（circular definition），我们将其转换为一个迭代计算。假设，我们有一个网络子集，包含由超链接链接起来的中心页面与权威页面。对每一个在子集中的页面，我们将迭代的计算中心分数（hub score）与权威分数（authority score）。子集的选取可以参考第21.3.1节。
 
-> 例1： </br>
-> 待评价译文 1： </br>
-> It is a guide to action which ensures that the military always obeys the commands of the party. </br>
-> 待评价译文 2： </br>
-> It is to insure the troops forever hearing the activity guidebook that party direct.
->
-> 参考译文 1： </br>
-> It is a guide to action that ensures that the military will forever heed Party commands. </br>
-> 参考译文 2： </br>
-> It is the guiding principle which guarantees the military forces always being under the command of the Party. </br>
-> 参考译文 3： </br>
-> It is the practical guide for the army always to heed the directions of the party.
+对于网络子集中一个网页$v$，使用$h(v)$表示它的中心分数（hub score），$a(v)$为权威分数（authority score）。一开始，对所有点节点$v$，设$h(v)=a(v)=1$。同时，$v \mapsto y$表示为从$v$到$y$存在的一个超链接。迭代算法（方程262）的核心是，对所有页面的hub score与authority score进行一对更新，它包含了直觉概念（intuitive notion）：优质的中心指向优质的权威，优质的权威被优质的中心指向。
+$$ h(v) \leftarrow \sum_{v\mapsto y} a(y) \tag{262}$$
+$$ a(v) \leftarrow \sum_{y\mapsto v} h(y)$$
 
-很明显的，待评价译文1要优于待评价译文2。我们可以看到在待评价译文1中使用的单词，许多都出现在了参考译文中，而待评价译文2的精确度要低的多。我们可以通过对比n-grams来确定精确度。但是这样的情况，存在一个问题，请看例2。
+所以，对于方程262的第一行计算页面$v$的中心分数为，对$v$所指向所有权威页面的权威分数求和。换而言之，如果$v$指向的页面有很高的权威分数，那他的中心分数将提高。第二行扮演了一个反向的角色，如果$v$被好的中心页面所指向，那它的权威分数将提高。
 
-> 例2： </br>
-> 待评价译文 </br> 
-> the the the the the the the
->
-> 参考译文 1： </br>
-> The cat is on the mat. </br>
-> 参考译文 2： </br>
-> There is a cat on the mat.
+更行迭代之后将发生什么，重新计算中心分数，接着基于这些计算过后的中心分数重新计算权威分数，然后呢？我们将方程262写成矩阵向量的形式。令$\vec{h}$与$\vec{a}$分别表示在网图子集中页面的所有的中心分数向量与权威分数向量。令$A$为网图子集处理过后的邻接矩阵，$A$为方阵，它的行与列是子集中的每个页面。元素$A_{ij}$为1，如果从页面$i$到页面$j$存在超链接；否则为0。于是我们可以将方程262写成：
+$$\displaystyle \vec{h} \leftarrow A\vec{a} \tag{264}$$
+$$\displaystyle \vec{a} \leftarrow A^T\vec{h}$$
 
-在本例中，待评价译文的精确度是100%。很明显这么分析是不对的。而实际的原因就是：参考译文中的单词，在匹配后不应重新计入匹配的状态。换而言之，参考译文中的单词，只能匹配一次，不重复匹配。从而，我们引出了**调整n-gram精确度（Modified n-gram precision）**。这类的调整n-gram精确度评分，涵盖了翻译的两部分内容：**充分性**和**流利度**。充分性体现在了一段翻译使用的单个单词（1-gram）趋于参考中文所使用的单词。流利度体现在使用较长的n-gram去匹配。
+这里$A^T$为矩阵$A$的转置。现在方程264中的每行的右侧都等于另一行左侧的向量。分别代入后，可以得到：
+$$ \vec{h} \leftarrow AA^T\vec{h} \tag{266}$$
+$$ \vec{a} \leftarrow A^TA\vec{a}$$
 
-而对一段测试文本，其中的一句往往不能代表本文的翻译水平，于是需要计算整段文本翻译精确度$p_n$，公式如下：
+现在，方程266与一对特征向量方程（第18.1节）有着惊人的相似性；事实上，如果我们用$=$替换$\leftarrow$并引入（未知）特征值，方程266的第一行可以变为$AA^T$的特征向量方程，同时第二行变为$A^TA$的特征向量方程：
+$$ \vec{h} = (1/\lambda_h) AA^T\vec{h} \tag{268}$$
+$$ \vec{a} = (1/\lambda_a) A^TA\vec{a}$$
 
-$$p_n = \frac {\sum_{C \in \{Candidates\}} \sum_{n-gram \in C} Count_{clip}(n-gram)} {\sum_{C' \in \{Candidates\}} \sum_{n-gram' \in C'} Count(n-gram')}$$
+这里我们用$\lambda_h$表示$AA^T$的特征值，用$\lambda_a$表示$A^TA$的特征值。
 
-首先，一句一句计算n-gram的匹配结果；接着，对所有的候选译文累加修剪后的n-gram数量，再除以在测试文本中候选n-gram的数量。即可得到调整后的精确度$p_n$。
+这里导致了一些关键性的结果：
+1. 如果缩放特征值，方程262（同等的，方程264）中的迭代更新，等同于用于计算$AA^T$与$A^TA$的特征向量的矩阵幂迭代方法。假设$AA^T$的主特征值是唯一的，迭代计算$\vec{h}$和$\vec{a}$处于由$A$决定的唯一稳态值（unique steady-state values），并且可以确定该图的连接结构。
+2. 在计算这些特征向量中，不限于使用矩阵幂迭代的方法；事实上，可以使用任何快速的方法来计算随机矩阵的主特征向量。
 
-由实验结果表明，当$n=4$的时候，有很最好的相关性（correlation），相比3-grams和5-grams，则给出了有比较性的结果。
+由此得到的计算结果，采用以下形式：
+1. 组装网页的目标子集，通过其中的超链接形成图结构，并计算$AA^T$与$A^TA$。
+2. 计算$AA^T$和$A^TA$的主特征值，来形成中心分数向量$\vec{h}$与权威分数向量$\vec{a}$。
+3. 输出有最高中心分数的中心页面与最高权威分数的权威页面。
 
-对于候选翻译的长度不一这个特点，评价指标应该将它也考虑其中。而精确度$p_n$不能满足这个要求，见例3：
+这种链接分析方法成为HITS，它是超链接引起的主题搜索（Hyperlink-Induced Topic Search）的缩写。
 
-> 例3： </br>
-> 待评价译文：</br>
-> of the
->
-> 参考译文 1： </br>
-> It is a guide to action that ensures that the military will forever heed Party commands. </br>
-> 参考译文 2： </br>
-> It is the guiding principle which guarantees the military forces always being under  the command of the Party. </br>
-> 参考译文 3： </br>
-> It is the practical guide for the army always to heed the directions of the party.
 
-在例3中，我们的调整unigram精确度为$2/2=1$；调整bigram精确度为$1/1 = 1$。
 
-与精确度相对的是召回率（recall）。然而，BELU使用多段参考译文，而在每一个参考译文中，一个单词可能会有不用的翻译单词和他对应。更深的说，一个好的待评价译文仅仅使用一个参考译文，而不是所有的参考译文。如例4：
+PageRank
 
-> 例4： </br>
-> 待评价译文 1： </br>
-> I always invariably perpetually do. </br>
-> 待评价译文 2： </br>
-> I always do.
->
-> 参考译文 1： </br>
-> I always do. </br>
-> 参考译文 2： </br>
-> I invariably do. </br>
-> 参考译文 3： </br>
-> I perpetually do. </br>
+PageRank是用解决谅解分析中网页排名的问题。在衡量一个网页的排名时，通常会认为：
+1. 当一个网页被更多的网页所指向（所链接）的时候，它的排名会靠前；
+2. 排名高的网页应该具有更大的表决权，也即当一个网页被排名高的网页所指向（所链接）的时候，它的重要性也应该有所对应的提高。
 
-在待评价译文1中，尽可能的使用了参考译文中出现的单词，与待评价译文2相比，这显然不是一个好的译文。所以用简单的召回率计算所有的参考译文中出现的单词，显然不是一个好的方法。
+基于以上两点，PageRank所建立的模型十分简单：一个网页的排名等于所链接到该网页的加权排名之和：
+$$PR_{i} = \sum_{(j,i) \in E} {\frac {PR_j} {O_j}}$$
 
-为了克服这个问题引进了一个**惩罚因子（brevity penalty）**，希望当候选译文的长度等于某一参考译文的长度，则惩罚因子为1.0。例如：如果有三个参考译文分别有12、15、17个单词，候选译文有12个单词，此时我们希望惩罚因子为1.0。
-另一个问题是，如果我们一句一句的计算惩罚因子，然后取平均，长度较短的句子将被惩罚的更严重。所以，选择通过整个文本计算惩罚因子，并且允许在句子上有一定的自由度。
+$PR_{i}$表示第$i$个网页的PageRank值，用来衡量每一个网页的排名；如果排名越高，PageRank值也就越大。网页之间的链接关系可以表示成一个有向图$G=(V,E)$，边$(j,i)$表示网页$j$链接到网页$i$。$O_{j}$表示网页$j$的出度。
 
-首先计算测试文本有效参考长度$r$，即对文本中每个候选译文的最优匹配长度求和。接着，通过以$e$为底、$r/c$为指数的指数级衰减，这里$c$是候选（待评价）译文文本的总体长度。
-
-$$BP = 
-\begin{cases}
-1                 & , if \quad c \gt r \\\\
-e^{1-{r \over c}} & , if \quad c \leq r 
+假定$P=(PR_1, PR_2, …, PR_n)^T$是n维Pagerank值向量，$A$为有向图$G$所对应的转移矩阵，
+$$A_{ij} = \begin{cases}
+\frac {1} {O_i} & if (j,i) \in E \\\\
+0 $ otherwise
 \end{cases}
 $$
-
-通过计算$BP$与$p_n$，可以得到BLEU值：
-
-$$BLEU = BP * exp(\sum_{n=1}^{N} W_n \log p_n)$$
-
-也可以同时两边取$\log$，得到：
-
-$$\log BLEU = min(1-{r \over c}, 0) + \sum_{n=1}^{N} W_n \log p_n$$
-
-需要说明的是，BELU的值介于0.0至1.0之间。很少有翻译可以达到1.0的评价，除非他们与参考译文是一致的。基于这些理由，就算是人工翻译的译文也不一定可以达到1.0的评价。
-
-------------------------------------------------------------------
-
-## 神经机器翻译
-
-> 论文参考： </br>
-> [Dzmitry Bahdanau, Kyunghyun Cho, and Yoshua Bengio. 2015. Neural machine translation by jointly learning to align and translate. ICLR.](https://arxiv.org/pdf/1409.0473.pdf)</br>
-> [Minh-Thang Luong, Hieu Pham, and Christopher D Manning. 2015. Effective approaches to attention-based neural machine translation. EMNLP.](https://arxiv.org/pdf/1508.04025.pdf)
-
-首先与传统的机器翻译做个对比。传统的机器翻译是基于短语的机器翻译；同时有许多调整过的子成分组成的。
-
-神经机器翻译，试图建立和训练一个单一的、大型神经网络，这个网络可以读取一句话，并输出正确的翻译。它由编码器-解码器（encoder-decoder）组成。可以说它是编码器-解码器家族的一员。编码神经网络将元语句读取并编码成固定长度的向量。然后，解码器从编码后的向量输出翻译。
-
-神经机器翻译，通常使用的是RNN结构(Luong et al. 2015):
-只是对于编码-解码器，会使用不同的RNN形式：
-- Kalchbrenner and Blunsom(2013)
-    - 编码器：使用CNN
-    - 解码器：使用标准隐藏单元的RNN
-- Sutskever et al.(2014)和Luong et al.(2015)
-    - 编码器、解码器：使用LSTM的隐藏单元的RNN
-- Cho et al.(2014), Bahdanau et al.(2015)和Jean et al.(2015)
-    - 采用了启发式LSTM隐藏单元(LSTM-inspired hidden unit)与gated recurrent unity(GRU)混合形式的RNN
-
-### 普通的RNN编码器-解码器
-![编码器-解码器](img/nmt_encdec.jpg)
-在编码器-解码器结构中，编码器（encoder）读取一个输入语句，即一个向量序列${\rm x}=(x_1,  ...,  x_{T_x})$，将其转化成一个向量$c$。最常用的方式就是使用一个RNN
-
-$$\begin{align}
-h_t = f(x_t, h_{t-1})
-\label{eq:rnn_hidden}
-\end{align}$$
-
-和
-
-$$\begin{align}
-c = q({h_1, ..., h_{T_x}})
-\end{align}$$
-
-其中$h_t \in {\Bbb R}^n$是$t$时刻的隐藏状态，$c$是一个从隐藏状态序列中生成的向量，$f$与$q$是一些非线性方程。
-
-解码器（decoder）通常被用来训练，在给定上下文向量$c_t$与所有之前预测的单词$\lbrace y_1, ..., y_{t'-1} \rbrace$的情况下，预测下一个单词$y_{t'}$。换而言之，解码器通过将联合概率分解成有序条件概率，从而定义翻译${\rm y}$上的概率：
-
-$$\begin{align}
-p({\rm y}) = \prod_{t=1}^T p(y_t | \{y_1, ..., t_{t-1}\}, c)
-\label{eq:probability_of_output}
-\end{align}$$
-
-这里${\rm y} = (y_1, ..., y_{T_y})$。对RNN，每个条件概率模型为：
-
-$$\begin{align}
-p(y_t | \{y_1, ..., y_{t-1}\}, c) = g(y_{t-1}, s_t, c)
-\end{align}$$
-
-其中$g$为输出$y_t$概率的非线性、多层方程，$s_t$是RNN的隐藏状态。
-
-所以在机器翻译中，我们的目标函数为：
-
-$$\begin{align}
-J_t = \sum_{(x,y)\in {\Bbb D}} - \log p(y | x)
-\end{align}$$
-
-其中${\Bbb D}$是平行训练语料库。
-
-### 对齐与翻译
-对于编码器-解码器有一个潜在的问题：一个神经网络需要有能力将源输入所有的信息压缩到一个定长的向量，这对于很长的输入将会是非常困难的。Bahdanau D. et al(2015)提出了一种改进方式，使用双向RNN作为编码器；在解码过程中，解码器仿真搜索源输入。
-
-![注意力模型](img/nmt_attention.png)
-
-解码器
-
-新结构中，重新定义了公式\eqref{eq:probability_of_output}中的条件概率：
-
-$$\begin{align}
-p(y_t | \{y_1, ..., y_{t-1}\}, {\rm x}) = g(y_{t-1}, s_t, c_i)
-\end{align}$$
-
-其中，$s_i$是RNN在$t$时刻的隐藏状态，计算如下：
-
-$$\begin{align}
-s_i = f(s_{i-1}, y_{i-1}, c_i)
-\end{align}$$
-
-这里需要注意的就是，不同于公式\eqref{eq:probability_of_output}，这里对于每个目标单词$y_i$的条件概率使用了不同的上下文向量$c_i$。
-
-上下文向量$c_i$依赖于一个注释（annotations）$(h_1, ..., h_{T_x})$序列，它是由编码器将输入句子映射成的，每个注释（annotations）$h_i$包含了整个输入句子的信息，同时专注与在第$i$个单词周围的的信息。
-
-上下文向量$c_i$通过这些注释（annotation）$h_i$的权重相加求得：
-
-$$\begin{align}
-c_i = \sum_{j=1}^{T_x} \alpha_{ij} h_j
-\end{align}$$
-
-这里对于每个注释（annotation）$h_j$的权重$\alpha_{ij}$，计算如下：
-
-$$\begin{align}
-\alpha_{ij} = \frac {\exp(e_{ij})} {\sum_{k=1}^{T_x} \exp(e_{ik})}
-\end{align}$$
-
-其中
-
-$$\begin{align}
-e_{ij} = a(s_i-1, h_j)
-\end{align}$$
-
-是一个对齐模型（alignment model），计算了在$j$位置的输入与$i$位置的输出的匹配程度。这个评价是基于RNN的隐藏状态$s_{i-1}$与输入语句的第$j$个注解$h_j$。
-
-对对齐模型$a$参数化为反馈神经网络（feedforward neural network），它联合系统其他部分一同训练。这有别于传统的机器翻译，对齐不被认为是隐式因子。相反，对齐模型直接计算了软对齐（soft alignment），这允许代价函数的梯度反向传播。这个梯度可以被用来训练对齐模型与整个翻译模型。
-
-我们可以将这个方法理解为，对所有的注解（annotations）做加权求和，将其作为注解期望（expected annotation），这个期望会建立在所可能的对齐情况。另$\alpha_{ij}$为目标单词$y_i$对齐的概率，或者是由源输入$x_j$翻译过来的概率。接着第$i$个上下文向量$c_i$是对于所有有着各自概率$\alpha_{ij}$注解（annotations）的期望注解（expected annotation）。
-
-概率$\alpha_{ij}$或者是它相关联的能量$e_{ij}$，反映了注解（annotation）$h_j$，相对于前一个隐藏状态$s_{t-1}$在决定下一个隐藏状态$s_i$和生成$y_i$的重要性。直观的说，这实现了解码器中的注意力机制。解码器决定了源输入哪些需要撇注意的，通过解码器的注意力机制，解除了编码器不行见源输入中的素有信息编码成固定长度的向量。用这种方法，信息可以在整个序列中传播注释，它可以由解码器相应的选择性的检索。
-
-编码器
-
-通常RNN如同公式\eqref{eq:rnn_hidden}中表述的那样，从第一个字符$x_1$到最后一个字符$x_{T_x}$有序的读取序列$\rm x$。这里作者做了调整，希望，每个单词的注解（annotation）不仅包括单词本身，还希望它包括后续单词。所以这里使用了双向RNN（bidirectional RNN）。
-
-BiRNN包括前馈RNN与反馈RNN。前馈RNN$\overrightarrow{f}$有序的读取序列，计算出前馈隐藏状态$(\overrightarrow{h_1}, ..., \overrightarrow{h_{T_x}})$的序列。反馈RNN$\overleftarrow{f}$反向读取序列，生成一个反向隐藏状态$(\overleftarrow{h_1}, ..., \overleftarrow{h_{T_x}})$的序列。
-
-对每个单词$x_j$的注释（annotation），可以通过组合前馈隐藏状态$\overrightarrow{f}$和反馈隐藏状态$\overleftarrow{f}$得到，即$h_j = [\overrightarrow{h_t^T}; \overleftarrow{h_t^T}]^T$。这样注解$h_j$同时包含了预测单词与后续单词的信息。由于RNN对当前的输入会有更好的表示，注解$h_j$将会关注于单词$x_j$附近的信息。
-
-### 注意力机制（attention machenism）
-Luong M.T. et al.(2016)提出了另一种模式，引入了全局注意力（global attetntion）与局部注意力（local attention）。这两个模型的共同之处在于，在解码阶段的每步t时刻，两个方法都是先获取一个堆叠LSTM顶层的隐藏状态$h_t$作为输入。接着就是导出上下文向量（context vector）$c_t$，它包含了相关输入端（source-side）的信息，来帮助预测当前目标单词$y_t$。而这两个模型不同的就是上下文向量$c_t$的导出方式。
-
-具体来说，给定目标隐藏状态（target hiddent state）$h_t$与输入端的上下文向量（source-side context vector）$c_t$，使用简单的连接层来组合两个向量生成注意力的隐藏状态（attentional hidden state）：
-
-$$\begin{align}
-\tilde{h}_t = \tanh (W_c [c_t; h_t])
-\end{align}$$
-
-而后，再将注意力向量（attentional vector）$\tilde{h}_t$通过$softmax$层，生成预测分布：
-
-$$\begin{align}
-p(y_t | y_{\lt t}, x) = softmax(W_s \tilde{h}_t)
-\end{align}$$
-
-#### 全局注意力（global attention）
-
-![全局注意力](img/nmt_global_attention.png)
-
-全局注意力模型（gloabl attention model）的核心就是，在推导上下文向量$c_t$的时候，考虑编码器的所有隐藏状态。在这个模型类型中，通过比较当前目标隐藏状态$h_t$和每个源隐藏状态（source hidden state）$\tilde{h}_t$，得到其长度等于输入端时间步长数目的变长对齐向量（variable-length vector）$a_t$:
-
-$$\begin{align}
-a_t(s) 
-& = align(h_t, \bar{h_s}) \\\\
-& = \frac {\exp(score(h_t, \bar{h_s}))} {\sum{s\'}\exp(score(h_t, \bar{h_s\'}))}
-\label{eq:global_attention_alignment_vector}
-\end{align}
-$$
-
-这里，$socre$根据基于内容的方程（content-base function）推出，有三种选择方式：
-
-$$\begin{align}
-score(h_s, \bar{h}_t) = \begin{cases}
-h_t^T \bar{h}_s                  & dot\\\\
-h_t^T W_a \bar{h}_s              & general\\\\
-v_a^T \tanh (W_a[h_t; \bar{h}_s]) & concat
-\end{cases}
-\end{align}
-$$
-
-相比Bahdanau et al.(2015)，注意力机制都很相似，但有几个关键点不同：
-1. 全局注意力在编码器和解码器上，简单的使用了顶层LSTM的隐藏状态；
-2. 全局的计算路径更为简单：$h_t$ -> $a_t$ -> $c_t$ -> $\tilde{h_t}$，而Bahdanau et al.(2015)则是：$h_{t-1}$ -> $a_t$ -> $c_t$ -> $h_t$。
-
-局部注意力（loacl attention）
-
-![局部注意力](img/nmt_local_attention.png)
-
-由于全局注意力有个弊端，它需要对每个目标单词，注意他们在输入端的所有的单词，这样的开销是巨大的，同时，可能使翻译长序列（例如段落或者文档）变得不切实际。为了克服这个问题，作者提出了局部注意力机制（local attention mechanism），对于每个目标单词，选择只关注源输入位置的一小部分。
-
-局部注意力机制有选择性的关注于内容的一个小窗口，这个方法避免了计算的开销，并且更容易训练。
-
-首先，模型在$t$时刻，对于每个目标单词，生成一个对齐位置$p_t$。接着，通过在窗口$[p_t-D, p_t+D]$上加权平均，生成上下文向量$c_t$，要说明的是$D$是经验选择。与全局注意力机制不同，局部对齐向量$a_t$现在是一个固定维度的向量，$\in R^{2D+1}$。这里如下两个模型的变体：
-
-单调对齐（Monotonic alignment，loacl-m），简单的设定$p_t=t$，假设输入与目标序列大致单调对齐。这样的对齐向量$a_t$可以用过公式\eqref{eq:global_attention_alignment_vector}定义。
-
-预测对齐（predictive alignment，local-p），不是假设单调对齐，而是预测对齐的位置：
-
-$$\begin{align}
-p_t = S \cdot sigmode(v_p^T \tanh (W_p h_t))
-\end{align}$$
-
-其中$W_p$和$v_p$是模型参数，被用来学习预测位置。$S$是源输入的长度。在$sigmod$之后，$p_t \in [0,S]$。为了更好的利用$p_t$附近的对齐点，放置一个以$p_t$为中心的高斯分布。具体来说，对齐权重定义为：
-
-$$\begin{align}
-a_t(s) = align(h_t, \bar {h}_s) \exp (- \frac {(s-p_t)^2} {2 \sigma ^2})
-\end{align}$$
-
-使用与公式\eqref{eq:global_attention_alignment_vector}相同的对齐方程（align fucntion），同时标准差是通过经验设定为$\sigma = \frac {D} {2}$。这里$p_t$是实数，而$s$是以$p_T$为中心的窗口下的整数。
-
-## 代码实例
-
-> 参考Tensorflow Tutorial: https://github.com/tensorflow/nmt
+n个简单模型可以改写为矩阵相乘的形式：
+$$P = A^TP$$
+
+然而，实际问题中，有些页面没只有入度没有出度，或者存在指向自身的情况。这种情况下，随着不断地迭代，将导致每个页面的权重不断减少，直至收敛于0。为此，产生了随机浏览的模型：
+$$PR_{i} = \frac {1-d} {N} + d \sum_{(j,i) \in E} {\frac {PR_j} {O_j}} $$
+$N$表示网页总数，$d$表示阻尼因子，可以理解为按照超链接进行浏览的概率，$1-d$则为随机跳转一个新页面的概率。
 
